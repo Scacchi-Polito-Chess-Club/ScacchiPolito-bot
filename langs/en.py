@@ -1,0 +1,15 @@
+hello = "Hello!"
+help = "Help!"
+cancel = "Cancel"
+done = "Done"
+welcome = "Welcome in the team"
+welcome_back = "Welcome back! Happy to see you again"
+
+
+SR_IDNumber = "IDNumber"
+faculty = "faculty"
+name = "Name"
+surname = "Surname"
+lichess_nickname = "Lichess nickname"
+chess_nickname = "Chess Nickname"
+fide_elo = "FIDE ELO"

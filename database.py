@@ -44,6 +44,17 @@ def insertTelegramUsers(conn, user_id, chat_id=None, username=None, admin=None, 
         print(error)
 
 
+def changeLangUser(conn, user_id, lang):
+    try:
+        cursor = conn.cursor()
+        query = "UPDATE telegram_users SET lang = %s WHERE user_id = %s"
+        args = (lang, user_id)
+        cursor.execute(query, args)
+        conn.commit()
+    except Error as error:
+        print(error)
+
+
 def getStudent(conn, user_id=None, number_id=None):
     cursor = conn.cursor()
     query = "SELECT * FROM students "
@@ -52,7 +63,7 @@ def getStudent(conn, user_id=None, number_id=None):
     elif number_id is not None:
         query = query + f"WHERE user_id = {number_id}"
     cursor.execute(query)
-    return cursor.fetchall() #fetchone, fetchall, fetchmany
+    return cursor.fetchone() #fetchone, fetchall, fetchmany
 
 
 def insertStudent(conn, user_id, number_id, name=None, surname=None, faculty=None, lichess_username=None, chess_username=None, fide_elo=None):

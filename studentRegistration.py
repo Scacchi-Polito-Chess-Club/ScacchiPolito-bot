@@ -29,28 +29,28 @@ def studentRegistration(update, context):
     """Starts registration when the command /register is issued."""
     """Sends a message with three inline buttons attached."""
     conn = connectPostgre()
-    user = getTelegramUser(conn, update.message.from_user.id)
+    user = getStudent(conn, update.message.from_user.id)
     reply = "Hi! Registration started!"
-    # if user:
-    #     currentdata = "\nCurrent data:\n" \
-    #                   f"ID number - {user[1]}\n" \
-    #                   f"Name - {user[2]}\n" \
-    #                   f"Surname - {user[3]}\n" \
-    #                   f"Faculty - {user[4]}\n" \
-    #                   f"Lichess - {user[5]}\n" \
-    #                   f"Chess - {user[6]}\n" \
-    #                   f"ELO FIDE - {user[7]}\n"
-    #     reply = reply + currentdata
-    #     context.user_data["ID Number"] = user[1]
-    #     context.user_data["Name"] = user[2]
-    #     context.user_data["Surname"] = user[3]
-    #     context.user_data["Faculty"] = user[4]
-    #     context.user_data["Lichess's nickname"] = user[5]
-    #     context.user_data["Chess's nickname"] = user[6]
-    #     context.user_data["FIDE_ELO"] = user[7]
-    # else:
-    #     context.user_data["Name"] = update.message.from_user.first_name
-    #     context.user_data["Surname"] = update.message.from_user.last_name
+    if user:
+        currentdata = "\nCurrent data:\n" \
+                      f"ID number - {user[1]}\n" \
+                      f"Name - {user[2]}\n" \
+                      f"Surname - {user[3]}\n" \
+                      f"Faculty - {user[4]}\n" \
+                      f"Lichess - {user[5]}\n" \
+                      f"Chess - {user[6]}\n" \
+                      f"ELO FIDE - {user[7]}\n"
+        reply = reply + currentdata
+        context.user_data["ID Number"] = user[1]
+        context.user_data["Name"] = user[2]
+        context.user_data["Surname"] = user[3]
+        context.user_data["Faculty"] = user[4]
+        context.user_data["Lichess nickname"] = user[5]
+        context.user_data["Chess nickname"] = user[6]
+        context.user_data["FIDE_ELO"] = user[7]
+    else:
+        context.user_data["Name"] = update.message.from_user.first_name
+        context.user_data["Surname"] = update.message.from_user.last_name
     update.message.reply_text(reply+"\nClick on the following button to set things.\nWhen you are done, write done!", reply_markup=markup)
     return CHOOSING
 
@@ -98,9 +98,20 @@ def studentRegistrationDone(update, context):
 
     conn = connectPostgre()
     insertStudent(conn, update.message.from_user.id, user_data.get("ID Number"), user_data.get("Name"), user_data.get("Surname"), user_data.get("Faculty"), user_data.get("Lichess nickname"), user_data.get("Chess nickname"), user_data.get("FIDE_ELO"))
-    # s = getStudent(conn, update.message.from_user.id)
-    conn.close()
-    update.message.reply_text(text=f"Check the infos: ", reply_markup=ReplyKeyboardRemove())
+    student = getStudent(conn, update.message.from_user.id)
+    finaldata=""
+    if student:
+        finaldata = "\nSaved data:\n" \
+                      f"ID number - {student[1]}\n" \
+                      f"Name - {student[2]}\n" \
+                      f"Surname - {student[3]}\n" \
+                      f"Faculty - {student[4]}\n" \
+                      f"Lichess - {student[5]}\n" \
+                      f"Chess - {student[6]}\n" \
+                      f"ELO FIDE - {student[7]}\n"
+    update.message.reply_text(text=finaldata, reply_markup=ReplyKeyboardRemove())
     user_data.clear()
+    conn.close()
+
     return ConversationHandler.END
 

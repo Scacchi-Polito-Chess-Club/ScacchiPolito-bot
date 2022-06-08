@@ -1,13 +1,12 @@
 import logging
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-
-import os
-import database
 import credentials
+import database
+from chessStats import *
 from studentRegistration import *
-from getLang import *
+from settings import *
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler, ConversationHandler
+
 
 PORT = int(os.environ.get('PORT', 5000))
 
@@ -61,9 +60,21 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("settings", settings))
     dp.add_handler(CommandHandler("get_all", getAll))
+    dp.add_handler(CommandHandler("get_stats", getStats))
 
-    conv_handler = ConversationHandler(
+    settings_handler = ConversationHandler(
+        entry_points=[CommandHandler("settings", settings)],
+        states={
+            START_OVER: [CallbackQueryHandler(settings1, pattern='^(cancel)$')],
+            CHOOSE_SETTING: [CallbackQueryHandler(choosingLang, pattern='^(lang)$')],
+            CHOOSE_LANG: [CallbackQueryHandler(setLang, pattern='^..$')],
+        },
+        fallbacks=[CallbackQueryHandler(settings1, pattern='cancel')]
+    )
+
+    registration_handler = ConversationHandler(
         entry_points=[CommandHandler('student_registration', studentRegistration)],
         states={
             CHOOSING: [
@@ -88,7 +99,8 @@ def main():
     )
 
     # Add ConversationHandler to application that will be used for handling updates
-    dp.add_handler(conv_handler)
+    dp.add_handler(registration_handler)
+    dp.add_handler(settings_handler)
 
     # log all errors
     dp.add_error_handler(error)
@@ -96,9 +108,8 @@ def main():
     #Webhook
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
-                          url_path=credentials.TOKEN)
-    updater.bot.setWebhook('https://bot-testingyeah.herokuapp.com/' + credentials.TOKEN)
-    updater.idle()
+                          url_path=credentials.TOKEN,
+                          webhook_url='https://scacchipolitobot.herokuapp.com/' + credentials.TOKEN)
 
 
 if __name__ == '__main__':

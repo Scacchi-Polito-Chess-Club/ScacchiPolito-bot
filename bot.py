@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import credentials
@@ -48,6 +49,15 @@ def getAll(update, context):
     return
 
 
+def createTournamentSunday(update, context):
+    conn = database.connectPostgre()
+    if not getTelegramUser(conn, update.message.from_user.id)[0][3]:
+        reply = "Sorry you need admin rigths."
+    else: reply = lichessApi.createTeamBattle(credentials.lichess_token, credentials.lichess_team_id)
+    update.message.reply_text(reply)
+    closeConnection(conn)
+
+
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -60,18 +70,21 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("settings", settings))
     dp.add_handler(CommandHandler("get_all", getAll))
     dp.add_handler(CommandHandler("get_stats", getStats))
+    dp.add_handler(CommandHandler("create_next_tournament", createTournamentSunday))
 
     settings_handler = ConversationHandler(
         entry_points=[CommandHandler("settings", settings)],
         states={
-            START_OVER: [CallbackQueryHandler(settings1, pattern='^(cancel)$')],
-            CHOOSE_SETTING: [CallbackQueryHandler(choosingLang, pattern='^(lang)$')],
-            CHOOSE_LANG: [CallbackQueryHandler(setLang, pattern='^..$')],
+            START_OVER: [CallbackQueryHandler(settings1, pattern='^(back)$')],
+            CHOOSE_SETTING: [CallbackQueryHandler(choosingLang, pattern='^(lang)$'),
+                             CallbackQueryHandler(settings1, pattern='^(back)$')],
+            CHOOSE_LANG: [CallbackQueryHandler(setLang, pattern='^..$'),
+                          CallbackQueryHandler(settings1, pattern='^(back)$')],
         },
-        fallbacks=[CallbackQueryHandler(settings1, pattern='cancel')]
+        fallbacks=[CallbackQueryHandler(settingsClose, pattern='^(exit)$')],
+        conversation_timeout=datetime.timedelta(minutes=5),
     )
 
     registration_handler = ConversationHandler(

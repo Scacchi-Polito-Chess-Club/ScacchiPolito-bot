@@ -29,6 +29,7 @@ def getStats(update, context):
         text += f"Rapid: {stat['perfs']['rapid']['rating']}\n"
         text += f"Puzzle: {stat['perfs']['puzzle']['rating']}\n"
         text += f"Win/Draw/Loss : {stat['count']['win']}/{stat['count']['draw']}/{stat['count']['loss']}\n"
+        update.message.reply_text(text)
     if student_username_chess:
         text = "\nChess stats:\n"
         text += getChessStats(student_username_chess)

@@ -1,4 +1,5 @@
 import requests
+import utility
 lichess_url = "https://lichess.org/"
 
 
@@ -101,7 +102,7 @@ def refuseJoinRequest(token, team_id, user_id):
 #   @param team_id the id of the team
 #   @param message to send in form-urlencoded format
 def messageTeamMembers(token, team_id, message):
-    r = requests.post(lichess_url + f"api/team/{team_id}/pm-all", data={"message" : message}, headers={"Authorization" : f"Bearer {token}"})
+    r = requests.post(lichess_url + f"team/{team_id}/pm-all", data={"message" : message}, headers={"Authorization" : f"Bearer {token}"})
     if r: return r.json()
 
 
@@ -109,4 +110,19 @@ def messageTeamMembers(token, team_id, message):
 #   @param token to authenticate
 def getProfile(token):
     r = requests.get(lichess_url + f"api/account", headers={"Authorization" : f"Bearer {token}"})
+    if r: return r.json()
+
+
+def createTeamBattle(token, team_id="testing-apis", name="Sundayyy", description = "Have Fun", clockTime=10, clockIncrement=5, minutes=90, date=utility.nextSunday()):
+    r = requests.post(
+        url=lichess_url + "api/tournament",
+        data={
+            "name": name,
+            "description": description,
+            "clockTime": clockTime,
+            "clockIncrement": clockIncrement,
+            "minutes": minutes,
+            "startDate": utility.toTimestamp(date),
+            "conditions.teamMember.teamId": team_id},
+        headers={"Authorization": f"Bearer {token}"})
     if r: return r.json()
